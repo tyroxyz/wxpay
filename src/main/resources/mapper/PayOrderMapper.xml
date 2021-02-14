@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.wxpay.mapper.PayOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xyz.wxpay.entity.PayOrder">
+        <id column="id" property="id" />
+        <result column="account_id" property="accountId" />
+        <result column="order_no" property="orderNo" />
+        <result column="third_order_id" property="thirdOrderId" />
+        <result column="type" property="type" />
+        <result column="cost_count" property="costCount" />
+        <result column="state" property="state" />
+        <result column="created_at" property="createdAt" />
+        <result column="paid_at" property="paidAt" />
+        <result column="company_id" property="companyId" />
+        <result column="site_id" property="siteId" />
+        <result column="msg" property="msg" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, account_id, order_no, third_order_id, type, cost_count, state, created_at, paid_at, company_id, site_id, msg
+    </sql>
+
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.wxpay.mapper.TokenLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xyz.wxpay.entity.TokenLog">
+        <id column="id" property="id" />
+        <result column="token_id" property="tokenId" />
+        <result column="account_id" property="accountId" />
+        <result column="account_name" property="accountName" />
+        <result column="account_full_name" property="accountFullName" />
+        <result column="order_id" property="orderId" />
+        <result column="third_order_id" property="thirdOrderId" />
+        <result column="change_type" property="changeType" />
+        <result column="before_count" property="beforeCount" />
+        <result column="change_count" property="changeCount" />
+        <result column="after_count" property="afterCount" />
+        <result column="type" property="type" />
+        <result column="cost_count" property="costCount" />
+        <result column="relation_type" property="relationType" />
+        <result column="relation_name" property="relationName" />
+        <result column="relation_icon_url" property="relationIconUrl" />
+        <result column="relation_id" property="relationId" />
+        <result column="msg" property="msg" />
+        <result column="remark" property="remark" />
+        <result column="company_id" property="companyId" />
+        <result column="site_id" property="siteId" />
+        <result column="org_id" property="orgId" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, token_id, account_id, account_name, account_full_name, order_id, third_order_id, change_type, before_count, change_count, after_count, type, cost_count, relation_type, relation_name, relation_icon_url, relation_id, msg, remark, company_id, site_id, org_id, created_at
+    </sql>
+
+</mapper>
