@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
  * @ClassName: WeiXinPayController
  * @author: zjl
  * @date: 2021/1/20  13:47
- *
  */
 
 
@@ -42,10 +41,33 @@ public class WeiXinPayController {
     @Autowired
     private WeiXinPayService weiXinPayService;
 
-    //创建二维码
+    //h5支付
+    @PostMapping(value = "/create")
+    public ResultConstant create(@RequestBody PayQo qo) {
+        CommonUtil.parseQo(qo);
+        Map<String, String> resultMap = weiXinPayService.create(qo);
+        return ResultConstant.ok().dataString(resultMap);
+    }
+
+    //二维码支付
     @PostMapping(value = "/create/native")
-    public ResultConstant createNative(@RequestBody PayQo qo){
-        Map<String,String> resultMap = weiXinPayService.createNative(qo);
+    public ResultConstant createNative(@RequestBody PayQo qo) {
+        Map<String, String> resultMap = weiXinPayService.createNative(qo);
+        return ResultConstant.ok().dataString(resultMap);
+    }
+
+    //js支付
+    @PostMapping(value = "/create/js")
+    public ResultConstant createJs(@RequestBody PayQo qo) {
+        Map<String, String> resultMap = weiXinPayService.createJs(qo);
+        return ResultConstant.ok().dataString(resultMap);
+    }
+
+
+    //h5支付
+    @PostMapping(value = "/create/h5")
+    public ResultConstant createH5(@RequestBody PayQo qo) {
+        Map<String, String> resultMap = weiXinPayService.createH5(qo);
         return ResultConstant.ok().dataString(resultMap);
     }
 
@@ -96,7 +118,7 @@ public class WeiXinPayController {
             // 创建请求参数
             SortedMap<String, String> req = new TreeMap<String, String>();
             req.put("appid", qo.getAppID()); // 公众号ID
-            req.put("mch_id", qo.getMchId());   // 商户号
+            req.put("mch_id", qo.getMchID());   // 商户号
             req.put("out_trade_no", qo.getOrderNo());    // 订单号
             req.put("nonce_str", WXPayUtil.generateNonceStr()); // 随机字符串
             req.put("sign", WXPayUtil.generateSignature(req, qo.getKey(), WXPayConstants.SignType.MD5));

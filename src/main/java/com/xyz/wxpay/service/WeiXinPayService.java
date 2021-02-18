@@ -11,5 +11,11 @@ import java.util.Map;
  */
 public interface WeiXinPayService {
 
-    public Map<String, String> createNative(PayQo qo);
+    Map<String, String> createNative(PayQo qo);
+
+    Map<String, String> createJs(PayQo qo);
+
+    Map<String, String> createH5(PayQo qo);
+
+    Map<String, String> create(PayQo qo);
 }
