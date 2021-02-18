@@ -41,7 +41,7 @@ public class WeiXinPayController {
     @Autowired
     private WeiXinPayService weiXinPayService;
 
-    //h5支付
+    //统一支付
     @PostMapping(value = "/create")
     public ResultConstant create(@RequestBody PayQo qo) {
         CommonUtil.parseQo(qo);
