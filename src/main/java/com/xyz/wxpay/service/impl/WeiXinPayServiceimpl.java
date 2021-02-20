@@ -1,11 +1,10 @@
 package com.xyz.wxpay.service.impl;
 
-import com.github.wxpay.sdk.MyConfig;
 import com.github.wxpay.sdk.WXPay;
+import com.xyz.wxpay.config.MyConfig;
 import com.xyz.wxpay.enums.ExchangeTypeEnum;
 import com.xyz.wxpay.pojo.qo.PayQo;
 import com.xyz.wxpay.service.WeiXinPayService;
-import com.xyz.wxpay.utils.CommonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -102,16 +101,13 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
             map.put("out_trade_no", qo.getOrderNo());      //商户订单号
             map.put("total_fee", String.valueOf((int) (qo.getCostCount()))); //标价金额,单位为分
             map.put("spbill_create_ip", "127.0.0.1");    //终端IP
-            map.put("trade_type", qo.getApiType());    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
+            map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(qo.getType()));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
 
-            if ("JSAPI".equalsIgnoreCase(qo.getApiType())) {
-                String accessToken = CommonUtil.getAccessToken("https://api.weixin.qq.com/sns/oauth2/access_token?appid=" +
-                        qo.getAppID() + "&secret=" + qo.getSecret() + "&code=" + qo.getCode() + "&grant_type=authorization_code");
-                String openid = CommonUtil.getOpenId(accessToken);
-                if (StringUtils.isEmpty(openid)) {
+            if ("JSAPI".equalsIgnoreCase(ExchangeTypeEnum.tradeTypeMap.get(qo.getType()))) {
+                if (StringUtils.isEmpty(qo.getOpenid())) {
                     throw new RuntimeException("缺少参数openid");
                 }
-                map.put("openid", CommonUtil.getOpenId(accessToken));
+                map.put("openid", qo.getOpenid());
             }
             Map<String, String> response = wxPay.unifiedOrder(map);
             if (response == null || response.size() == 0) {

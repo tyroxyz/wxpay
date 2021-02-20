@@ -1,15 +1,6 @@
 package com.xyz.wxpay.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Charsets;
 import com.xyz.wxpay.pojo.qo.PayQo;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -105,28 +96,7 @@ public class CommonUtil {
         return ip;
     }
 
-    public static String getAccessToken(String url) throws Exception {
-        // 创建HttpClient实例
-        CloseableHttpClient client = HttpClientBuilder.create().build();
-        // 根据URL创建HttpGet实例
-        HttpGet get = new HttpGet(url);
-        // 执行get请求，得到返回体
-        HttpResponse response = client.execute(get);
-        // 判断是否正常返回
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            // 解析数据
-            String data = EntityUtils.toString(response.getEntity(), Charsets.UTF_8);
-            System.out.println(data);
-            return data;
-        }
-        return "";
-    }
 
-
-    public static String getOpenId(String data) throws Exception {
-        JSONObject jsonObject = JSON.parseObject(data);
-        return jsonObject.getString("openid");
-    }
 
     public static void parseQo(PayQo qo) {
         if(!StringUtils.isEmpty(qo.getMsg())){

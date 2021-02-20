@@ -154,15 +154,19 @@ public class WeiXinPayController {
             outSteam.close();
             inStream.close();
             String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息
-            Map<String, String> map = WXPayUtil.xmlToMap(result);
-            if (map.get("result_code").equalsIgnoreCase("SUCCESS")) {
-                //返回成功后修改订单状态
-                String outTradeNo = map.get("out_trade_no");
-                orderService.updateByOrderNo(outTradeNo, ExchangeStateEnum.paySuccess, new Date());
+            if (WXPayUtil.isSignatureValid(result, "kEOPx9w0QvmYOKUGOd4TJMfgH1Hlxsb5")) {//签名验证成功
+                Map<String, String> map = WXPayUtil.xmlToMap(result);
+                if (map.get("result_code").equalsIgnoreCase("SUCCESS")) {
+                    //返回成功后修改订单状态
+                    String outTradeNo = map.get("out_trade_no");
+                    orderService.updateByOrderNo(outTradeNo, ExchangeStateEnum.paySuccess, new Date());
+                }
+                return "SUCCESS";
             }
+            return "签名验证失败";
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "SUCCESS";
+        return "签名验证失败";
     }
 }

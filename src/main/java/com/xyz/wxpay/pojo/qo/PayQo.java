@@ -40,8 +40,9 @@ public class PayQo {
     @ApiModelProperty("回调url")
     private String notifyUrl;
 
-    @ApiModelProperty("JSAPI，NATIVE，APP，,H5支付固定传MWEB")
-    private String apiType;
+    @ApiModelProperty("openid")
+    private String openid;
+
 
     @ApiModelProperty("商户APPSECRET")
     private String secret;
