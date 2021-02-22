@@ -154,19 +154,28 @@ public class WeiXinPayController {
             outSteam.close();
             inStream.close();
             String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息
-            if (WXPayUtil.isSignatureValid(result, "kEOPx9w0QvmYOKUGOd4TJMfgH1Hlxsb5")) {//签名验证成功
-                Map<String, String> map = WXPayUtil.xmlToMap(result);
-                if (map.get("result_code").equalsIgnoreCase("SUCCESS")) {
-                    //返回成功后修改订单状态
-                    String outTradeNo = map.get("out_trade_no");
-                    orderService.updateByOrderNo(outTradeNo, ExchangeStateEnum.paySuccess, new Date());
-                }
-                return "SUCCESS";
+            Map<String, String> map = WXPayUtil.xmlToMap(result);
+            System.out.println("微信支付回调返回信息：" + map);
+            if (map.get("sign").isEmpty()) {
+                System.out.println("签名错误");
+                return "<xml>\n" +
+                        "<return_code><![CDATA[FAIL]]></return_code>\n" +
+                        "<return_msg><![CDATA[签名失败]]></return_msg>"+
+                        "</xml>";
             }
-            return "签名验证失败";
+            if (map.get("result_code").equalsIgnoreCase("SUCCESS")) {
+                //返回成功后修改订单状态
+                String outTradeNo = map.get("out_trade_no");
+                orderService.updateByOrderNo(outTradeNo, ExchangeStateEnum.paySuccess, new Date());
+                System.out.println("回调成功");
+                return "<xml>\n" +
+                        "  <return_code><![CDATA[SUCCESS]]></return_code>\n" +
+                        "  <return_msg><![CDATA[OK]]></return_msg>\n" +
+                        "</xml>";
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "签名验证失败";
+        return "SUCCESS";
     }
 }

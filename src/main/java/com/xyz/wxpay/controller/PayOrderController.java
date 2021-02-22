@@ -28,12 +28,6 @@ public class PayOrderController {
     @Autowired
     private PayOrderService payOrderService;
 
-    @GetMapping("/get")
-    public String get(){
-        return "123";
-    }
-
-
     @PostMapping("/save")
     public OrderVO saveOrder(@RequestBody OrderQO qo) {
         PayOrder order = new PayOrder();
