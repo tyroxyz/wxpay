@@ -140,7 +140,7 @@ public class WeiXinPayController {
             String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息
             Map<String, String> map = WXPayUtil.xmlToMap(result);
             System.out.println("微信支付回调返回信息：" + map);
-            if (map.get("sign").isEmpty()) {
+            if (map.get("sign").isEmpty() || !signatureValid(map)) {
                 System.out.println("签名错误");
                 return "<xml>\n" +
                         "<return_code><![CDATA[FAIL]]></return_code>\n" +
@@ -161,5 +161,16 @@ public class WeiXinPayController {
             e.printStackTrace();
         }
         return "SUCCESS";
+    }
+
+    /**
+     * 验证签名
+     * @param map
+     * @return
+     * @throws Exception
+     */
+    public boolean signatureValid(Map<String, String> map) throws Exception {
+        ThirdPayConfig config = thirdPayConfigService.getConfigByAppId(map.get("appid"));
+        return WXPayUtil.isSignatureValid(map, config.getApiKey());
     }
 }

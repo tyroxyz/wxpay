@@ -38,7 +38,7 @@ public class PayOrder extends Model<PayOrder> {
     private Long accountId;
 
     /**
-     * 平台订单号  新增token_log是生成
+     * 平台订单号
      */
     @TableField("order_no")
     private String orderNo;
@@ -50,7 +50,7 @@ public class PayOrder extends Model<PayOrder> {
     private Long thirdOrderId;
 
     /**
-     * 支付终端 100:微信公众号  110：内嵌h5调用 120:微信pc端扫码 130:支付宝pc端扫码
+     * 支付终端 100:微信公众号  110：内嵌h5调用 120:微信pc端扫码
      */
     @TableField("type")
     private Integer type;
@@ -78,12 +78,6 @@ public class PayOrder extends Model<PayOrder> {
      */
     @TableField("paid_at")
     private Date paidAt;
-
-    @TableField("company_id")
-    private Long companyId;
-
-    @TableField("site_id")
-    private Long siteId;
 
     /**
      * 订单 提示
