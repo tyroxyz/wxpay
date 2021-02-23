@@ -2,12 +2,17 @@ package com.xyz.wxpay.service.impl;
 
 import com.github.wxpay.sdk.WXPay;
 import com.xyz.wxpay.config.MyConfig;
+import com.xyz.wxpay.entity.ThirdPayConfig;
 import com.xyz.wxpay.enums.ExchangeTypeEnum;
-import com.xyz.wxpay.pojo.qo.PayQo;
+import com.xyz.wxpay.pojo.qo.WechatQO;
+import com.xyz.wxpay.service.ThirdPayConfigService;
 import com.xyz.wxpay.service.WeiXinPayService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,82 +23,15 @@ import java.util.Map;
  */
 @Service
 public class WeiXinPayServiceimpl implements WeiXinPayService {
-    /**
-     * 创建二维码支付
-     *
-     * @param qo
-     * @return
-     */
+
+    @Autowired
+    private ThirdPayConfigService thirdPayConfigService;
+
     @Override
-    public Map<String, String> createNative(PayQo qo) {
+    public Map<String, String> create(WechatQO qo) {
         try {
-            MyConfig config = new MyConfig(qo.getAppID(), qo.getMchID(), qo.getKey());
-            WXPay wxPay = new WXPay(config);
-            Map<String, String> map = new HashMap<>(16);
-            map.put("notify_url", qo.getNotifyUrl()); // 异步通知地址
-            map.put("body", qo.getMsg());    //商品描述
-            map.put("out_trade_no", qo.getOrderNo());      //商户订单号
-            map.put("total_fee", String.valueOf((int) (qo.getCostCount()))); //标价金额,单位为分
-            map.put("spbill_create_ip", "127.0.0.1");    //终端IP
-            map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(ExchangeTypeEnum.nativeapi));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
-
-            Map<String, String> response = wxPay.unifiedOrder(map);
-            if (response == null || response.size() == 0) {
-                throw new RuntimeException("下单失败");
-            }
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 创建js支付
-     *
-     * @param qo
-     * @return
-     */
-    @Override
-    public Map<String, String> createJs(PayQo qo) {
-        try {
-            MyConfig config = new MyConfig(qo.getAppID(), qo.getMchID(), qo.getKey());
-            WXPay wxPay = new WXPay(config);
-            Map<String, String> map = new HashMap<>(16);
-            map.put("notify_url", qo.getNotifyUrl()); // 异步通知地址
-            map.put("body", qo.getMsg());    //商品描述
-            map.put("out_trade_no", qo.getOrderNo());      //商户订单号
-            map.put("total_fee", String.valueOf((int) (qo.getCostCount()))); //标价金额,单位为分
-            map.put("spbill_create_ip", "127.0.0.1");    //终端IP
-            map.put("openid", "openid");    //openid
-            map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(ExchangeTypeEnum.jsapi));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
-
-            Map<String, String> response = wxPay.unifiedOrder(map);
-            if (response == null || response.size() == 0) {
-                throw new RuntimeException("下单失败");
-            }
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 创建h5支付
-     *
-     * @param qo
-     * @return
-     */
-    @Override
-    public Map<String, String> createH5(PayQo qo) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> create(PayQo qo) {
-        try {
-            MyConfig config = new MyConfig(qo.getAppID(), qo.getMchID(), qo.getKey());
+            ThirdPayConfig thirdPayConfig = thirdPayConfigService.getConfigByAppId(qo.getAppID());
+            MyConfig config = new MyConfig(qo.getAppID(), thirdPayConfig.getMchId(), thirdPayConfig.getApiKey());
             WXPay wxPay = new WXPay(config);
             Map<String, String> map = new HashMap<>(16);
             map.put("notify_url", qo.getNotifyUrl()); // 异步通知地址
@@ -104,10 +42,22 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
             map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(qo.getType()));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
 
             if ("JSAPI".equalsIgnoreCase(ExchangeTypeEnum.tradeTypeMap.get(qo.getType()))) {
-                if (StringUtils.isEmpty(qo.getOpenid())) {
+                String openid = qo.getOpenid();
+                if (StringUtils.isEmpty(openid)) {
+                    System.out.println("缺少参数openid");
                     throw new RuntimeException("缺少参数openid");
                 }
-                map.put("openid", qo.getOpenid());
+                map.put("openid", openid);
+            } else if ("MWEB".equalsIgnoreCase(ExchangeTypeEnum.tradeTypeMap.get(qo.getType()))) {
+                //h5跳转设置wapurl供跳转
+                map.put("scene_info", "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"" +
+                        qo.getWapUrl() + "\",\"wap_name\": \"" + qo.getMsg() + "\"}}");
+            } else {
+                //二维码设置过期时间15分钟
+                Long expireTime = 15*60*1000L;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                Date afterDate = new Date(new Date().getTime() + expireTime);
+                map.put("time_expire", sdf.format(afterDate));
             }
             Map<String, String> response = wxPay.unifiedOrder(map);
             if (response == null || response.size() == 0) {

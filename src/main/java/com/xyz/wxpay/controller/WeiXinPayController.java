@@ -3,9 +3,11 @@ package com.xyz.wxpay.controller;
 import com.github.wxpay.sdk.WXPayConstants;
 import com.github.wxpay.sdk.WXPayUtil;
 import com.xyz.wxpay.constants.ResultConstant;
+import com.xyz.wxpay.entity.ThirdPayConfig;
 import com.xyz.wxpay.enums.ExchangeStateEnum;
-import com.xyz.wxpay.pojo.qo.PayQo;
+import com.xyz.wxpay.pojo.qo.WechatQO;
 import com.xyz.wxpay.service.PayOrderService;
+import com.xyz.wxpay.service.ThirdPayConfigService;
 import com.xyz.wxpay.service.WeiXinPayService;
 import com.xyz.wxpay.utils.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,33 +40,14 @@ public class WeiXinPayController {
     @Autowired
     private WeiXinPayService weiXinPayService;
 
+    @Autowired
+    private ThirdPayConfigService thirdPayConfigService;
+
     //统一支付
     @PostMapping(value = "/create")
-    public ResultConstant create(@RequestBody PayQo qo) {
+    public ResultConstant create(@RequestBody WechatQO qo) {
         CommonUtil.parseQo(qo);
         Map<String, String> resultMap = weiXinPayService.create(qo);
-        return ResultConstant.ok().dataString(resultMap);
-    }
-
-    //二维码支付
-    @PostMapping(value = "/create/native")
-    public ResultConstant createNative(@RequestBody PayQo qo) {
-        Map<String, String> resultMap = weiXinPayService.createNative(qo);
-        return ResultConstant.ok().dataString(resultMap);
-    }
-
-    //js支付
-    @PostMapping(value = "/create/js")
-    public ResultConstant createJs(@RequestBody PayQo qo) {
-        Map<String, String> resultMap = weiXinPayService.createJs(qo);
-        return ResultConstant.ok().dataString(resultMap);
-    }
-
-
-    //h5支付
-    @PostMapping(value = "/create/h5")
-    public ResultConstant createH5(@RequestBody PayQo qo) {
-        Map<String, String> resultMap = weiXinPayService.createH5(qo);
         return ResultConstant.ok().dataString(resultMap);
     }
 
@@ -80,7 +60,7 @@ public class WeiXinPayController {
 
 
     @PostMapping(value = "/queryOrder")
-    public String queryOrder(@RequestBody PayQo qo) {
+    public String queryOrder(@RequestBody WechatQO qo) {
         int x = 0;
         while (true) {
             // 调用查询微信支付订单状态方法
@@ -113,18 +93,22 @@ public class WeiXinPayController {
      * @param qo 支付入参
      * @return 支付状态
      */
-    private Map<String, String> queryPayStatus(PayQo qo) {
+    private Map<String, String> queryPayStatus(WechatQO qo) {
         try {
+            ThirdPayConfig config = thirdPayConfigService.getConfigByAppId(qo.getAppID());
+            if (Objects.isNull(config)) {
+                throw new Exception("该商户未开通");
+            }
             // 创建请求参数
             SortedMap<String, String> req = new TreeMap<String, String>();
             req.put("appid", qo.getAppID()); // 公众号ID
-            req.put("mch_id", qo.getMchID());   // 商户号
+            req.put("mch_id", config.getMchId());   // 商户号
             req.put("out_trade_no", qo.getOrderNo());    // 订单号
             req.put("nonce_str", WXPayUtil.generateNonceStr()); // 随机字符串
-            req.put("sign", WXPayUtil.generateSignature(req, qo.getKey(), WXPayConstants.SignType.MD5));
+            req.put("sign", WXPayUtil.generateSignature(req, config.getApiKey(), WXPayConstants.SignType.MD5));
 
             // 生成要发送的 xml
-            String xmlBody = WXPayUtil.generateSignedXml(req, qo.getKey());
+            String xmlBody = WXPayUtil.generateSignedXml(req, config.getApiKey());
             System.err.println(String.format("查询订单支付状态 xml 格式:\n%s", xmlBody));
 
             // 调用查询订单支付状态 API

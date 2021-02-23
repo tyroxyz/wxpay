@@ -1,6 +1,6 @@
 package com.xyz.wxpay.utils;
 
-import com.xyz.wxpay.pojo.qo.PayQo;
+import com.xyz.wxpay.pojo.qo.WechatQO;
 import org.springframework.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -98,7 +98,7 @@ public class CommonUtil {
 
 
 
-    public static void parseQo(PayQo qo) {
+    public static void parseQo(WechatQO qo) {
         if(!StringUtils.isEmpty(qo.getMsg())){
             qo.setMsg( qo.getMsg().length()>15 ? qo.getMsg().substring(0,15)+"...":qo.getMsg());
         }

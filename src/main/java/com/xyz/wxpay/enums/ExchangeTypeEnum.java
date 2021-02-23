@@ -26,7 +26,7 @@ public class ExchangeTypeEnum {
     public final static Map<Integer, String> tradeTypeMap = new HashMap<Integer, String>() {
         {
             put(jsapi, "JSAPI");
-            put(h5api, "H5API");
+            put(h5api, "MWEB");
             put(nativeapi, "NATIVE");
             put(alipay, "支付宝pc端扫码");
         }

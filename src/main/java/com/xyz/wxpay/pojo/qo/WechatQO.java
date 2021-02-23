@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("支付入参")
-public class PayQo {
+public class WechatQO {
 
     @ApiModelProperty("消耗人名币数量(单位（分）)")
     private Integer costCount;
 
-    @ApiModelProperty("支付终端 100:微信公众号  110：内嵌h5调用 120:微信pc端扫码 130:支付宝pc端扫码")
+    @ApiModelProperty("支付终端 100:微信公众号  110：内嵌h5调用 120:微信pc端扫码")
     private Integer type;
 
     @ApiModelProperty("订单描述")
@@ -31,22 +31,13 @@ public class PayQo {
     @ApiModelProperty("微信公众账号")
     private String appID;
 
-    @ApiModelProperty("商户号")
-    private String mchID;
-
-    @ApiModelProperty("API密钥")
-    private String key;
-
     @ApiModelProperty("回调url")
     private String notifyUrl;
 
     @ApiModelProperty("openid")
     private String openid;
 
+    @ApiModelProperty("h5跳转链接")
+    private String wapUrl;
 
-    @ApiModelProperty("商户APPSECRET")
-    private String secret;
-
-    @ApiModelProperty("用户code")
-    private String code;
 }
