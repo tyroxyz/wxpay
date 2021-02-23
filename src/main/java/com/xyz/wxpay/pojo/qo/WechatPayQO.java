@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("支付入参")
-public class WechatQO {
+public class WechatPayQO {
 
     @ApiModelProperty("消耗人名币数量(单位（分）)")
     private Integer costCount;

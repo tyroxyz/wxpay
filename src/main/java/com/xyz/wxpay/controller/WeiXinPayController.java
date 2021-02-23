@@ -5,7 +5,8 @@ import com.github.wxpay.sdk.WXPayUtil;
 import com.xyz.wxpay.constants.ResultConstant;
 import com.xyz.wxpay.entity.ThirdPayConfig;
 import com.xyz.wxpay.enums.ExchangeStateEnum;
-import com.xyz.wxpay.pojo.qo.WechatQO;
+import com.xyz.wxpay.pojo.qo.WechatPayQO;
+import com.xyz.wxpay.pojo.qo.WechatQueryQO;
 import com.xyz.wxpay.service.PayOrderService;
 import com.xyz.wxpay.service.ThirdPayConfigService;
 import com.xyz.wxpay.service.WeiXinPayService;
@@ -45,7 +46,7 @@ public class WeiXinPayController {
 
     //统一支付
     @PostMapping(value = "/create")
-    public ResultConstant create(@RequestBody WechatQO qo) {
+    public ResultConstant create(@RequestBody WechatPayQO qo) {
         CommonUtil.parseQo(qo);
         Map<String, String> resultMap = weiXinPayService.create(qo);
         return ResultConstant.ok().dataString(resultMap);
@@ -60,7 +61,7 @@ public class WeiXinPayController {
 
 
     @PostMapping(value = "/queryOrder")
-    public String queryOrder(@RequestBody WechatQO qo) {
+    public String queryOrder(@RequestBody WechatQueryQO qo) {
         int x = 0;
         while (true) {
             // 调用查询微信支付订单状态方法
@@ -93,7 +94,7 @@ public class WeiXinPayController {
      * @param qo 支付入参
      * @return 支付状态
      */
-    private Map<String, String> queryPayStatus(WechatQO qo) {
+    private Map<String, String> queryPayStatus(WechatQueryQO qo) {
         try {
             ThirdPayConfig config = thirdPayConfigService.getConfigByAppId(qo.getAppID());
             if (Objects.isNull(config)) {

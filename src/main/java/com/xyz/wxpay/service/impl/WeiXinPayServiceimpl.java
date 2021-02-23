@@ -4,7 +4,7 @@ import com.github.wxpay.sdk.WXPay;
 import com.xyz.wxpay.config.MyConfig;
 import com.xyz.wxpay.entity.ThirdPayConfig;
 import com.xyz.wxpay.enums.ExchangeTypeEnum;
-import com.xyz.wxpay.pojo.qo.WechatQO;
+import com.xyz.wxpay.pojo.qo.WechatPayQO;
 import com.xyz.wxpay.service.ThirdPayConfigService;
 import com.xyz.wxpay.service.WeiXinPayService;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,7 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
     private ThirdPayConfigService thirdPayConfigService;
 
     @Override
-    public Map<String, String> create(WechatQO qo) {
+    public Map<String, String> create(WechatPayQO qo) {
         try {
             ThirdPayConfig thirdPayConfig = thirdPayConfigService.getConfigByAppId(qo.getAppID());
             MyConfig config = new MyConfig(qo.getAppID(), thirdPayConfig.getMchId(), thirdPayConfig.getApiKey());

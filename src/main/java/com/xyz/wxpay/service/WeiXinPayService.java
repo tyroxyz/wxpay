@@ -1,6 +1,6 @@
 package com.xyz.wxpay.service;
 
-import com.xyz.wxpay.pojo.qo.WechatQO;
+import com.xyz.wxpay.pojo.qo.WechatPayQO;
 
 import java.util.Map;
 
@@ -10,5 +10,5 @@ import java.util.Map;
  * @date: 2021/1/21  9:28
  */
 public interface WeiXinPayService {
-    Map<String, String> create(WechatQO qo);
+    Map<String, String> create(WechatPayQO qo);
 }
