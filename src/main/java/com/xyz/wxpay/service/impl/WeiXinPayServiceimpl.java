@@ -1,6 +1,8 @@
 package com.xyz.wxpay.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.github.wxpay.sdk.WXPay;
+import com.github.wxpay.sdk.WXPayUtil;
 import com.xyz.wxpay.config.MyConfig;
 import com.xyz.wxpay.entity.ThirdPayConfig;
 import com.xyz.wxpay.enums.ExchangeTypeEnum;
@@ -60,8 +62,33 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
                 map.put("time_expire", sdf.format(afterDate));
             }
             Map<String, String> response = wxPay.unifiedOrder(map);
-            if (response == null || response.size() == 0) {
-                throw new RuntimeException("下单失败");
+            if (!response.isEmpty() && response.get("result_code").equals("SUCCESS")) {
+                if (qo.getType() == ExchangeTypeEnum.h5api.intValue() || qo.getType() == ExchangeTypeEnum.nativeapi.intValue()) { //扫码支付和h5不需要二次签名
+                    response.put("out_trade_no", qo.getOrderNo());
+                    if (null != response.get("mweb_url")) { //h5回调页面 回调链接需要urlencode处理 官网文档：https://pay.weixin.qq.com/wiki/doc/api/H5.php?chapter=15_4
+                        response.put("mweb_url", response.get("mweb_url") + "&redirect_url=" + java.net.URLEncoder.encode(qo.getWapUrl(), "GBK"));
+                    }
+                    return response;
+                }
+                //下单成功后 二次签名
+                response.put("out_trade_no", qo.getOrderNo());
+                //二次签名map
+                Map<String, String> dualSignature = new HashMap<>();
+                dualSignature.put("appId", qo.getAppID());
+
+                String packag = "prepay_id=" + response.get("prepay_id");
+                String timeStamp = String.valueOf(DateUtil.currentSeconds());
+                dualSignature.put("package", packag);
+                dualSignature.put("signType", "MD5");
+                dualSignature.put("nonceStr", response.get("nonce_str"));
+                dualSignature.put("timeStamp", timeStamp);
+
+                //签名
+                String sign = WXPayUtil.generateSignature(dualSignature, thirdPayConfig.getApiKey());
+                response.put("sign", sign);
+                response.put("firstSign", response.get("sign"));
+                response.put("timeStamp", timeStamp);
+                return response;
             }
             return response;
         } catch (Exception e) {
