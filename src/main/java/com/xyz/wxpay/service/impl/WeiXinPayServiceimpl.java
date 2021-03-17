@@ -43,14 +43,14 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
             map.put("spbill_create_ip", "127.0.0.1");    //终端IP
             map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(qo.getType()));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
 
-            if ("JSAPI".equalsIgnoreCase(ExchangeTypeEnum.tradeTypeMap.get(qo.getType()))) {
+            if (qo.getType() == ExchangeTypeEnum.jsapi.intValue()) {
                 String openid = qo.getOpenid();
                 if (StringUtils.isEmpty(openid)) {
                     System.out.println("缺少参数openid");
                     throw new RuntimeException("缺少参数openid");
                 }
                 map.put("openid", openid);
-            } else if ("MWEB".equalsIgnoreCase(ExchangeTypeEnum.tradeTypeMap.get(qo.getType()))) {
+            } else if (qo.getType() == ExchangeTypeEnum.h5api.intValue()) {
                 //h5跳转设置wapurl供跳转
                 map.put("scene_info", "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"" +
                         qo.getWapUrl() + "\",\"wap_name\": \"" + qo.getMsg() + "\"}}");
