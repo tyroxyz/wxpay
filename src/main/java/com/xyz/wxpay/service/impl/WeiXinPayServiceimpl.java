@@ -32,6 +32,7 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
     @Override
     public Map<String, String> create(WechatPayQO qo) {
         try {
+            //获取第三方支付配置信息
             ThirdPayConfig thirdPayConfig = thirdPayConfigService.getConfigByAppId(qo.getAppID());
             MyConfig config = new MyConfig(qo.getAppID(), thirdPayConfig.getMchId(), thirdPayConfig.getApiKey());
             WXPay wxPay = new WXPay(config);
@@ -41,9 +42,10 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
             map.put("out_trade_no", qo.getOrderNo());      //商户订单号
             map.put("total_fee", String.valueOf((int) (qo.getCostCount()))); //标价金额,单位为分
             map.put("spbill_create_ip", "127.0.0.1");    //终端IP
-            map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(qo.getType()));    //交易类型，JSAPI -JSAPI支付,NATIVE -Native支付,APP -APP支付
+            map.put("trade_type", ExchangeTypeEnum.tradeTypeMap.get(qo.getType()));    //交易类型，JSAPI -JSAPI支付/企业微信,NATIVE -Native支付,MWEB -h5支付
 
             if (qo.getType() == ExchangeTypeEnum.jsapi.intValue()) {
+                //js支付获取在当前appid下的openid
                 String openid = qo.getOpenid();
                 if (StringUtils.isEmpty(openid)) {
                     System.out.println("缺少参数openid");
@@ -54,23 +56,26 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
                 //h5跳转设置wapurl供跳转
                 map.put("scene_info", "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"" +
                         qo.getWapUrl() + "\",\"wap_name\": \"" + qo.getMsg() + "\"}}");
-            } else {
-                //二维码设置过期时间15分钟
-                Long expireTime = 15*60*1000L;
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                Date afterDate = new Date(new Date().getTime() + expireTime);
-                map.put("time_expire", sdf.format(afterDate));
             }
+            //订单设置过期时间15分钟
+            Long expireTime = 15*60*1000L;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            Date afterDate = new Date(new Date().getTime() + expireTime);
+            map.put("time_expire", sdf.format(afterDate));
+
+            //下单
             Map<String, String> response = wxPay.unifiedOrder(map);
             if (!response.isEmpty() && response.get("result_code").equals("SUCCESS")) {
-                if (qo.getType() == ExchangeTypeEnum.h5api.intValue() || qo.getType() == ExchangeTypeEnum.nativeapi.intValue()) { //扫码支付和h5不需要二次签名
+                if (qo.getType() == ExchangeTypeEnum.h5api.intValue() || qo.getType() == ExchangeTypeEnum.nativeapi.intValue()) {
+                    //扫码支付和h5不需要二次签名
                     response.put("out_trade_no", qo.getOrderNo());
-                    if (null != response.get("mweb_url")) { //h5回调页面 回调链接需要urlencode处理 官网文档：https://pay.weixin.qq.com/wiki/doc/api/H5.php?chapter=15_4
+                    if (null != response.get("mweb_url")) {
+                        //h5回调页面 回调链接需要urlencode处理 官网文档：https://pay.weixin.qq.com/wiki/doc/api/H5.php?chapter=15_4
                         response.put("mweb_url", response.get("mweb_url") + "&redirect_url=" + java.net.URLEncoder.encode(qo.getWapUrl(), "GBK"));
                     }
                     return response;
                 }
-                //下单成功后 二次签名
+                //下单成功后 企业微信（调用js）/js 需要二次签名
                 response.put("out_trade_no", qo.getOrderNo());
                 //二次签名map
                 Map<String, String> dualSignature = new HashMap<>();
@@ -83,7 +88,7 @@ public class WeiXinPayServiceimpl implements WeiXinPayService {
                 dualSignature.put("nonceStr", response.get("nonce_str"));
                 dualSignature.put("timeStamp", timeStamp);
 
-                //签名
+                //二次签名
                 String sign = WXPayUtil.generateSignature(dualSignature, thirdPayConfig.getApiKey());
                 response.put("sign", sign);
                 response.put("firstSign", response.get("sign"));
